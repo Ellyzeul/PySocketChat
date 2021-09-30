@@ -37,18 +37,22 @@ def run():
         active_windows_special_char()           # Faz tratamento de caracteres especiais
         username = input('Your name? ')
         display = f'{username}> '
+        client.sendto(bytes('\\'+display, "utf-8"), (socket.gethostname(), configs["port"]))    # Envia uma mensagem inicial ao servidor para registrar seu nome se usuário no servidor
 
         t = Thread(
             target = listen_messages, 
             args = (client, display,)
         )
         t.daemon = True
-        t.start()                               # Inicia uma thread para ficar escutando mensagens que chegam do servidor
+        t.start()   # Inicia uma thread para ficar escutando mensagens que chegam do servidor
 
-        print("welcome to the chat\n\n")
+        print("Bem vindo ao chat global\n\nPara conversar com um usuário específico\ndigite seu user + % + espaço.\n\nex.: user='ellyz'\tMarque-o digitando 'ellyz% ' ao começo de sua mensagem\n\nPara sair do chat digite '\\quit' ou use as teclas Ctrl+C\n\n")
         while True:
             to_send = input(display)
             client.sendto(bytes(display+to_send, "utf-8"), (socket.gethostname(), configs["port"])) # Envia a mensagem digitada pelo cliente atual para o servidor
+            if to_send == "\quit":
+                client.close()
+                exit()
 
     except KeyboardInterrupt: # Em caso de derrubar o servidor com Ctrl+C
         client.sendto(bytes("\\quit", "utf-8"), (socket.gethostname(), configs["port"])) # Mandando mensagem ao servidor para desconexão
